@@ -1,0 +1,1640 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏆 Prize Day Detectives - Игра</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .game-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* HEADER */
+        .game-header {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 15px 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .robot-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #667eea;
+        }
+
+        .game-title {
+            font-size: 1.2em;
+            font-weight: 800;
+            color: #4a4a8a;
+        }
+
+        .game-subtitle {
+            font-size: 0.75em;
+            color: #888;
+        }
+
+        .progress-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stars-display {
+            font-size: 1.5em;
+        }
+
+        .progress-bar {
+            width: 150px;
+            height: 16px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #f9a825, #fdd835, #f9a825);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        .level-badge {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.85em;
+        }
+
+        /* SCREENS */
+        .screen {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* WELCOME SCREEN */
+        .welcome-screen {
+            text-align: center;
+            padding: 30px 0;
+        }
+
+        .welcome-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
+
+        .welcome-robot {
+            width: 150px;
+            height: 150px;
+            object-fit: contain;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .welcome-title {
+            font-size: 2.2em;
+            font-weight: 900;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .welcome-desc {
+            font-size: 1.1em;
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .welcome-topics {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .topic-tag {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            color: #2e7d32;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9em;
+        }
+
+        .topic-tag.purple {
+            background: linear-gradient(135deg, #e8eaf6, #c5cae9);
+            color: #3949ab;
+        }
+
+        .topic-tag.orange {
+            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+            color: #e65100;
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 18px 50px;
+            border-radius: 50px;
+            font-size: 1.3em;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            font-family: 'Nunito', sans-serif;
+        }
+
+        .btn-start:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-start:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        /* LEVEL SCREENS */
+        .level-intro {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .level-number {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            width: 50px;
+            height: 50px;
+            line-height: 50px;
+            border-radius: 50%;
+            font-size: 1.5em;
+            font-weight: 900;
+            margin-bottom: 10px;
+        }
+
+        .level-title {
+            font-size: 1.8em;
+            font-weight: 900;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            margin-bottom: 5px;
+        }
+
+        .level-desc {
+            color: rgba(255,255,255,0.9);
+            font-size: 1em;
+        }
+
+        .game-card {
+            background: rgba(255,255,255,0.97);
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.15);
+            margin-bottom: 20px;
+        }
+
+        .instruction {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 5px solid #42a5f5;
+            padding: 15px 20px;
+            border-radius: 0 15px 15px 0;
+            margin-bottom: 25px;
+            font-size: 1.05em;
+            color: #1565c0;
+            font-weight: 600;
+        }
+
+        .instruction .emoji {
+            font-size: 1.3em;
+            margin-right: 8px;
+        }
+
+        /* LEVEL 1: Word Match */
+        .match-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .match-column {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .match-column-title {
+            text-align: center;
+            font-weight: 800;
+            font-size: 1.1em;
+            color: #667eea;
+            margin-bottom: 5px;
+            padding: 8px;
+            background: #f0f0ff;
+            border-radius: 12px;
+        }
+
+        .match-item {
+            padding: 15px 20px;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            user-select: none;
+        }
+
+        .match-singular {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            color: #2e7d32;
+        }
+
+        .match-plural {
+            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+            color: #e65100;
+        }
+
+        .match-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .match-item.selected {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.3);
+            transform: scale(1.05);
+        }
+
+        .match-item.matched {
+            background: linear-gradient(135deg, #c8e6c9, #a5d6a7) !important;
+            color: #1b5e20 !important;
+            border-color: #4caf50;
+            pointer-events: none;
+            animation: matchPop 0.5s ease;
+        }
+
+        .match-item.wrong {
+            animation: shake 0.5s ease;
+            border-color: #f44336;
+        }
+
+        @keyframes matchPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+
+        /* LEVEL 2: Some or Any */
+        .sentence-card {
+            background: #f8f9ff;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 18px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+
+        .sentence-card.correct {
+            border-color: #4caf50;
+            background: #e8f5e9;
+        }
+
+        .sentence-card.incorrect {
+            border-color: #f44336;
+            background: #ffebee;
+        }
+
+        .sentence-text {
+            font-size: 1.2em;
+            color: #333;
+            line-height: 2;
+            margin-bottom: 15px;
+        }
+
+        .sentence-blank {
+            display: inline-block;
+            min-width: 80px;
+            text-align: center;
+            border-bottom: 3px dashed #999;
+            padding: 2px 5px;
+            margin: 0 5px;
+            color: #667eea;
+            font-weight: 800;
+            transition: all 0.3s ease;
+        }
+
+        .sentence-blank.filled {
+            border-bottom-color: #4caf50;
+            color: #2e7d32;
+        }
+
+        .sentence-blank.wrong-blank {
+            border-bottom-color: #f44336;
+            color: #c62828;
+        }
+
+        .options-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .option-btn {
+            padding: 10px 22px;
+            border-radius: 25px;
+            border: 2px solid #ddd;
+            background: white;
+            font-size: 1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Nunito', sans-serif;
+            color: #555;
+        }
+
+        .option-btn:hover {
+            border-color: #667eea;
+            color: #667eea;
+            background: #f0f0ff;
+        }
+
+        .option-btn.chosen {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .option-btn.correct-btn {
+            border-color: #4caf50;
+            background: #4caf50;
+            color: white;
+        }
+
+        .option-btn.wrong-btn {
+            border-color: #f44336;
+            background: #f44336;
+            color: white;
+        }
+
+        /* LEVEL 3: Picture Questions */
+        .picture-scene {
+            background: #f0f4ff;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .scene-image {
+            width: 100%;
+            max-width: 500px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+        }
+
+        .scene-emoji {
+            font-size: 3em;
+            margin: 10px;
+        }
+
+        .question-text {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #4a4a8a;
+            margin-bottom: 15px;
+        }
+
+        .answer-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .answer-btn {
+            padding: 14px 28px;
+            border-radius: 20px;
+            border: 3px solid #ddd;
+            background: white;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Nunito', sans-serif;
+            min-width: 140px;
+        }
+
+        .answer-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .answer-btn.correct-answer {
+            border-color: #4caf50;
+            background: linear-gradient(135deg, #4caf50, #66bb6a);
+            color: white;
+            animation: correctPulse 0.6s ease;
+        }
+
+        .answer-btn.wrong-answer {
+            border-color: #f44336;
+            background: linear-gradient(135deg, #f44336, #ef5350);
+            color: white;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes correctPulse {
+            0% { transform: scale(1); }
+            30% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* LEVEL 4: Story Builder */
+        .story-container {
+            background: linear-gradient(135deg, #fff8e1, #ffecb3);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 3px solid #ffd54f;
+        }
+
+        .story-title {
+            font-size: 1.3em;
+            font-weight: 800;
+            color: #e65100;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .story-sentence {
+            font-size: 1.15em;
+            line-height: 2.2;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .story-select {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 10px;
+            border: 2px solid #ffd54f;
+            background: white;
+            font-size: 1em;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'Nunito', sans-serif;
+            color: #333;
+            min-width: 90px;
+            text-align: center;
+            transition: all 0.3s ease;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        .story-select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .story-select.correct-select {
+            border-color: #4caf50;
+            background: #e8f5e9;
+        }
+
+        .story-select.wrong-select {
+            border-color: #f44336;
+            background: #ffebee;
+        }
+
+        /* FEEDBACK */
+        .feedback {
+            text-align: center;
+            padding: 15px;
+            border-radius: 15px;
+            margin-top: 15px;
+            font-weight: 700;
+            font-size: 1.1em;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 2px solid #4caf50;
+        }
+
+        .feedback.error {
+            background: #ffebee;
+            color: #c62828;
+            border: 2px solid #f44336;
+        }
+
+        .feedback.hint {
+            background: #fff3e0;
+            color: #e65100;
+            border: 2px solid #ff9800;
+        }
+
+        /* NAVIGATION */
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn-nav {
+            padding: 14px 35px;
+            border-radius: 50px;
+            border: none;
+            font-size: 1.1em;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Nunito', sans-serif;
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, #4caf50, #66bb6a);
+            color: white;
+            box-shadow: 0 5px 15px rgba(76,175,80,0.3);
+        }
+
+        .btn-next:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(76,175,80,0.4);
+        }
+
+        .btn-next:disabled {
+            background: #ccc;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-retry {
+            background: linear-gradient(135deg, #ff9800, #ffc107);
+            color: white;
+            box-shadow: 0 5px 15px rgba(255,152,0,0.3);
+        }
+
+        .btn-retry:hover {
+            transform: translateY(-2px);
+        }
+
+        /* CERTIFICATE */
+        .certificate {
+            background: white;
+            border-radius: 25px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            border: 5px solid #ffd54f;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .certificate::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: linear-gradient(90deg, #f44336, #ff9800, #ffeb3b, #4caf50, #2196f3, #9c27b0);
+        }
+
+        .certificate-title {
+            font-size: 2em;
+            font-weight: 900;
+            background: linear-gradient(135deg, #ff8f00, #f57f17);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .certificate-robot {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            margin: 15px 0;
+        }
+
+        .certificate-text {
+            font-size: 1.2em;
+            color: #555;
+            margin-bottom: 15px;
+        }
+
+        .certificate-name {
+            font-size: 1.5em;
+            font-weight: 900;
+            color: #667eea;
+            margin: 15px 0;
+            padding: 10px 30px;
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            display: inline-block;
+        }
+
+        .certificate-stars {
+            font-size: 2.5em;
+            margin: 15px 0;
+        }
+
+        .certificate-stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: 900;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            color: #888;
+            font-weight: 600;
+        }
+
+        .certificate-image {
+            width: 200px;
+            border-radius: 15px;
+            margin: 15px 0;
+        }
+
+        .name-input {
+            padding: 12px 25px;
+            border: 3px solid #667eea;
+            border-radius: 15px;
+            font-size: 1.2em;
+            text-align: center;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            color: #333;
+            margin: 10px 0 20px;
+            width: 250px;
+            max-width: 90%;
+        }
+
+        .name-input:focus {
+            outline: none;
+            border-color: #764ba2;
+            box-shadow: 0 0 0 3px rgba(118,75,162,0.2);
+        }
+
+        /* HINT BOX */
+        .hint-box {
+            background: linear-gradient(135deg, #e8eaf6, #c5cae9);
+            border-radius: 15px;
+            padding: 15px 20px;
+            margin: 15px 0;
+            border-left: 5px solid #5c6bc0;
+        }
+
+        .hint-box h4 {
+            color: #3949ab;
+            margin-bottom: 8px;
+        }
+
+        .hint-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 5px 0;
+            font-size: 0.95em;
+            color: #455a64;
+        }
+
+        .hint-icon {
+            font-size: 1.2em;
+        }
+
+        /* CONFETTI */
+        .confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        .confetti-piece {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            top: -10px;
+            animation: confettiFall 3s ease-in forwards;
+        }
+
+        @keyframes confettiFall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 600px) {
+            .game-header {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            .match-grid {
+                grid-template-columns: 1fr;
+            }
+            .welcome-title {
+                font-size: 1.6em;
+            }
+            .game-card {
+                padding: 20px;
+            }
+            .certificate-stats {
+                gap: 15px;
+            }
+        }
+
+        /* Score popup */
+        .score-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3em;
+            font-weight: 900;
+            color: #4caf50;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            z-index: 100;
+            animation: scorePop 1s ease forwards;
+            pointer-events: none;
+        }
+
+        @keyframes scorePop {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            30% { opacity: 1; transform: translate(-50%, -50%) scale(1.3); }
+            100% { opacity: 0; transform: translate(-50%, -60%) scale(1); }
+        }
+
+        .level-complete-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 500;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .level-complete-card {
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            text-align: center;
+            max-width: 400px;
+            animation: bounce 0.5s ease;
+        }
+
+        .level-complete-card h2 {
+            font-size: 1.8em;
+            color: #4caf50;
+            margin-bottom: 10px;
+        }
+
+        .level-complete-card .stars-earned {
+            font-size: 2.5em;
+            margin: 15px 0;
+        }
+
+        .level-complete-card p {
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- HEADER -->
+        <div class="game-header">
+            <div class="header-left">
+                <img src="https://image.qwenlm.ai/public_source/da94bca4-1caf-40cb-ae02-d2f4ca651584/15f9b1015-100a-4e7e-be19-8fe023586dc9.png" alt="Robot" class="robot-avatar">
+                <div>
+                    <div class="game-title">🏆 Prize Day Detectives</div>
+                    <div class="game-subtitle">Irregular Plurals & Some/Any</div>
+                </div>
+            </div>
+            <div class="progress-container">
+                <div class="stars-display" id="starsDisplay">⭐ 0</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="level-badge" id="levelBadge">Уровень 1</div>
+            </div>
+        </div>
+
+        <!-- WELCOME SCREEN -->
+        <div class="screen active" id="welcomeScreen">
+            <div class="welcome-card">
+                <img src="https://image.qwenlm.ai/public_source/da94bca4-1caf-40cb-ae02-d2f4ca651584/15f9b1015-100a-4e7e-be19-8fe023586dc9.png" alt="Robot Detective" class="welcome-robot">
+                <div class="welcome-title">Prize Day Detectives! 🔍</div>
+                <div class="welcome-desc">
+                    Привет, детектив! 🕵️<br>
+                    Робот <b>Glitch-Bot</b> потерял отчёт о школьном награждении!<br>
+                    Помоги восстановить отчёт, пройдя 4 уровня!
+                </div>
+                <div class="welcome-topics">
+                    <span class="topic-tag">👤→👥 man → men</span>
+                    <span class="topic-tag purple">👩→👩👩 woman → women</span>
+                    <span class="topic-tag orange">🧒→🧒 child → children</span>
+                    <span class="topic-tag">✅ some / ❌ any</span>
+                    <span class="topic-tag purple">💭 was / 🔸 were</span>
+                </div>
+                <div class="hint-box">
+                    <h4>💡 Подсказка:</h4>
+                    <div class="hint-item"><span class="hint-icon">1️⃣</span> <b>was</b> = один предмет</div>
+                    <div class="hint-item"><span class="hint-icon">2️+</span> <b>were</b> = два и более</div>
+                    <div class="hint-item"><span class="hint-icon">✅</span> <b>some</b> = утверждение (+)</div>
+                    <div class="hint-item"><span class="hint-icon">❓</span> <b>any</b> = отрицание (−) или вопрос (?)</div>
+                </div>
+                <button class="btn-start" onclick="startGame()">🚀 НАЧАТЬ МИССИЮ!</button>
+            </div>
+        </div>
+
+        <!-- LEVEL 1: WORD MATCH -->
+        <div class="screen" id="level1Screen">
+            <div class="level-intro">
+                <div class="level-number">1</div>
+                <div class="level-title">🔤 Word Lab</div>
+                <div class="level-desc">Соедини единственное и множественное число!</div>
+            </div>
+            <div class="game-card">
+                <div class="instruction">
+                    <span class="emoji">👆</span> Нажми на слово слева, затем на его множественную форму справа!
+                </div>
+                <div class="match-grid" id="matchGrid">
+                    <div class="match-column">
+                        <div class="match-column-title">📌 Единственное число</div>
+                        <div class="match-item match-singular" data-word="man" onclick="selectSingular(this)">👤 man</div>
+                        <div class="match-item match-singular" data-word="woman" onclick="selectSingular(this)">👩 woman</div>
+                        <div class="match-item match-singular" data-word="child" onclick="selectSingular(this)">🧒 child</div>
+                    </div>
+                    <div class="match-column">
+                        <div class="match-column-title">📌 Множественное число</div>
+                        <div class="match-item match-plural" data-word="children" onclick="selectPlural(this)">🧒🧒 children</div>
+                        <div class="match-item match-plural" data-word="men" onclick="selectPlural(this)">👥 men</div>
+                        <div class="match-item match-plural" data-word="women" onclick="selectPlural(this)">👩👩 women</div>
+                    </div>
+                </div>
+                <div class="feedback" id="level1Feedback"></div>
+                <div class="nav-buttons">
+                    <button class="btn-nav btn-next" id="btnNext1" onclick="goToLevel(2)" disabled>Далее →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- LEVEL 2: SOME OR ANY -->
+        <div class="screen" id="level2Screen">
+            <div class="level-intro">
+                <div class="level-number">2</div>
+                <div class="level-title">🔍 Some or Any?</div>
+                <div class="level-desc">Выбери правильное слово: some или any!</div>
+            </div>
+            <div class="game-card">
+                <div class="instruction">
+                    <span class="emoji">💡</span> <b>some</b> = ✅ есть / <b>any</b> = ❌ нет или ❓ вопрос
+                </div>
+
+                <div class="sentence-card" id="l2q1">
+                    <div class="sentence-text">
+                        There weren't <span class="sentence-blank" id="l2q1blank">______</span> children in the classroom.
+                    </div>
+                    <div class="options-row">
+                        <button class="option-btn" onclick="chooseSomeAny('l2q1', 'some', this)">some</button>
+                        <button class="option-btn" onclick="chooseSomeAny('l2q1', 'any', this)">any</button>
+                    </div>
+                </div>
+
+                <div class="sentence-card" id="l2q2">
+                    <div class="sentence-text">
+                        There were <span class="sentence-blank" id="l2q2blank">______</span> teachers in the classroom.
+                    </div>
+                    <div class="options-row">
+                        <button class="option-btn" onclick="chooseSomeAny('l2q2', 'some', this)">some</button>
+                        <button class="option-btn" onclick="chooseSomeAny('l2q2', 'any', this)">any</button>
+                    </div>
+                </div>
+
+                <div class="sentence-card" id="l2q3">
+                    <div class="sentence-text">
+                        Were there <span class="sentence-blank" id="l2q3blank">______</span> parents at the prize-giving?
+                    </div>
+                    <div class="options-row">
+                        <button class="option-btn" onclick="chooseSomeAny('l2q3', 'some', this)">some</button>
+                        <button class="option-btn" onclick="chooseSomeAny('l2q3', 'any', this)">any</button>
+                    </div>
+                </div>
+
+                <div class="sentence-card" id="l2q4">
+                    <div class="sentence-text">
+                        There were <span class="sentence-blank" id="l2q4blank">______</span> men, women and children.
+                    </div>
+                    <div class="options-row">
+                        <button class="option-btn" onclick="chooseSomeAny('l2q4', 'some', this)">some</button>
+                        <button class="option-btn" onclick="chooseSomeAny('l2q4', 'any', this)">any</button>
+                    </div>
+                </div>
+
+                <div class="feedback" id="level2Feedback"></div>
+                <div class="nav-buttons">
+                    <button class="btn-nav btn-next" id="btnNext2" onclick="goToLevel(3)" disabled>Далее →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- LEVEL 3: WAS OR WERE + PICTURE -->
+        <div class="screen" id="level3Screen">
+            <div class="level-intro">
+                <div class="level-number">3</div>
+                <div class="level-title">🏆 Prize Day!</div>
+                <div class="level-desc">Посмотри на картинку и ответь на вопросы!</div>
+            </div>
+            <div class="game-card">
+                <div class="instruction">
+                    <span class="emoji">🖼️</span> Посмотри на картинку и выбери правильный ответ!
+                </div>
+                <div class="picture-scene">
+                    <img src="https://image.qwenlm.ai/public_source/da94bca4-1caf-40cb-ae02-d2f4ca651584/13692b914-9376-4030-a4a6-f87ef7fc4aeb.png" alt="Prize Day" class="scene-image">
+                </div>
+
+                <div class="sentence-card" id="l3q1">
+                    <div class="question-text">❓ How many children were there?</div>
+                    <div class="answer-buttons">
+                        <button class="answer-btn" onclick="answerPicture('l3q1', 'Many children!', this)">🧒🧒 Many children!</button>
+                        <button class="answer-btn" onclick="answerPicture('l3q1', 'No children', this)">😶 No children</button>
+                    </div>
+                </div>
+
+                <div class="sentence-card" id="l3q2">
+                    <div class="question-text">❓ Were there any teachers?</div>
+                    <div class="answer-buttons">
+                        <button class="answer-btn" onclick="answerPicture('l3q2', 'No teachers', this)">😶 No teachers</button>
+                        <button class="answer-btn" onclick="answerPicture('l3q2', 'Yes, some teachers!', this)">👨‍👩‍🏫 Yes, some teachers!</button>
+                    </div>
+                </div>
+
+                <div class="sentence-card" id="l3q3">
+                    <div class="question-text">❓ Was there a prize?</div>
+                    <div class="answer-buttons">
+                        <button class="answer-btn" onclick="answerPicture('l3q3', 'Yes, there was a prize!', this)">🏆 Yes, there was a prize!</button>
+                        <button class="answer-btn" onclick="answerPicture('l3q3', 'No prize', this)">❌ No prize</button>
+                    </div>
+                </div>
+
+                <div class="feedback" id="level3Feedback"></div>
+                <div class="nav-buttons">
+                    <button class="btn-nav btn-next" id="btnNext3" onclick="goToLevel(4)" disabled>Далее →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- LEVEL 4: STORY BUILDER -->
+        <div class="screen" id="level4Screen">
+            <div class="level-intro">
+                <div class="level-number">4</div>
+                <div class="level-title">📝 Restore the Report!</div>
+                <div class="level-desc">Восстанови отчёт о школьном награждении!</div>
+            </div>
+            <div class="game-card">
+                <div class="instruction">
+                    <span class="emoji">📋</span> Выбери правильное слово для каждого пропуска!
+                </div>
+                <div class="story-container">
+                    <div class="story-title">🏫 School Prize-Giving Report</div>
+                    
+                    <div class="story-sentence" id="story1">
+                        It <select class="story-select" id="story1_select" onchange="checkStory()">
+                            <option value="">___</option>
+                            <option value="was">was</option>
+                            <option value="were">were</option>
+                        </select>
+                        the school prize-giving. We 
+                        <select class="story-select" id="story2_select" onchange="checkStory()">
+                            <option value="">___</option>
+                            <option value="was">was</option>
+                            <option value="were">were</option>
+                        </select>
+                        late.
+                    </div>
+
+                    <div class="story-sentence" id="story2">
+                        There 
+                        <select class="story-select" id="story3_select" onchange="checkStory()">
+                            <option value="">___</option>
+                            <option value="wasn't">wasn't</option>
+                            <option value="weren't">weren't</option>
+                        </select>
+                        <select class="story-select" id="story4_select" onchange="checkStory()">
+                            <option value="">___</option>
+                            <option value="some">some</option>
+                            <option value="any">any</option>
+                        </select>
+                        children in the classroom.
+                    </div>
+
+                    <div class="story-sentence" id="story3">
+                        But there 
+                        <select class="story-select" id="story5_select" onchange="checkStory()">
+                            <option value="">___</option>
+                            <option value="was">was</option>
+                            <option value="were">were</option>
+                        </select>
+                        <select class="story-select" id="story6_select" onchange="checkStory()">
+                            <option value="">___</option>
+                            <option value="some">some</option>
+                            <option value="any">any</option>
+                        </select>
+                        teachers.
+                    </div>
+
+                    <div class="story-sentence" id="story4">
+                        There 
+                        <select class="story-select" id="story7_select" onchange="checkStory()">
+                            <option value="">___</option>
+                            <option value="was">was</option>
+                            <option value="were">were</option>
+                        </select>
+                        <select class="story-select" id="story8_select" onchange="checkStory()">
+                            <option value="">___</option>
+                            <option value="some">some</option>
+                            <option value="any">any</option>
+                        </select>
+                        men, women and children at the prize-giving.
+                    </div>
+
+                    <div class="story-sentence" id="story5">
+                        There 
+                        <select class="story-select" id="story9_select" onchange="checkStory()">
+                            <option value="">___</option>
+                            <option value="was">was</option>
+                            <option value="were">were</option>
+                        </select>
+                        a prize for English. We 
+                        <select class="story-select" id="story10_select" onchange="checkStory()">
+                            <option value="">___</option>
+                            <option value="was">was</option>
+                            <option value="were">were</option>
+                        </select>
+                        the winners!
+                    </div>
+                </div>
+
+                <div class="feedback" id="level4Feedback"></div>
+                <div class="nav-buttons">
+                    <button class="btn-nav btn-retry" onclick="resetStory()">🔄 Заново</button>
+                    <button class="btn-nav btn-next" id="btnNext4" onclick="showCertificate()" disabled>🏆 Получить сертификат!</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- CERTIFICATE SCREEN -->
+        <div class="screen" id="certificateScreen">
+            <div class="certificate">
+                <div class="certificate-title">🏆 CERTIFICATE OF ACHIEVEMENT</div>
+                <div class="certificate-stars" id="certStars">⭐⭐⭐⭐⭐</div>
+                <img src="https://image.qwenlm.ai/public_source/da94bca4-1caf-40cb-ae02-d2f4ca651584/15f9b1015-100a-4e7e-be19-8fe023586dc9.png" alt="Robot" class="certificate-robot">
+                <div class="certificate-text">
+                    Настоящий детектив успешно восстановил отчёт<br>
+                    о школьном награждении!
+                </div>
+                <input type="text" class="name-input" id="playerName" placeholder="Твоё имя" maxlength="20">
+                <div class="certificate-name" id="certName">Time Detective</div>
+                <div class="certificate-stats">
+                    <div class="stat-item">
+                        <div class="stat-number" id="certCorrect">0</div>
+                        <div class="stat-label">Правильных</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="certTotal">0</div>
+                        <div class="stat-label">Всего вопросов</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="certStarsNum">0</div>
+                        <div class="stat-label">Звёзд</div>
+                    </div>
+                </div>
+                <img src="https://image.qwenlm.ai/public_source/da94bca4-1caf-40cb-ae02-d2f4ca651584/183cacb55-7368-4553-8b98-d1c245e84cb2.png" alt="Trophy" class="certificate-image">
+                <div style="margin-top: 20px;">
+                    <button class="btn-nav btn-start" onclick="restartGame()" style="font-size: 1em; padding: 14px 35px;">🔄 Играть снова</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="confetti-container" id="confettiContainer"></div>
+
+    <script>
+        // Game State
+        let totalStars = 0;
+        let correctAnswers = 0;
+        let totalQuestions = 0;
+        let currentLevel = 1;
+
+        // Level 1: Word Match
+        let selectedSingular = null;
+        let selectedPlural = null;
+        let matchedPairs = 0;
+        const pairs = {
+            'man': 'men',
+            'woman': 'women',
+            'child': 'children'
+        };
+
+        // Level 2: Some or Any answers
+        const l2Answers = {
+            'l2q1': 'any',
+            'l2q2': 'some',
+            'l2q3': 'any',
+            'l2q4': 'some'
+        };
+        let l2Answered = {};
+        let l2Correct = 0;
+        let l2Total = 4;
+
+        // Level 3: Picture answers
+        const l3Answers = {
+            'l3q1': 'Many children!',
+            'l3q2': 'Yes, some teachers!',
+            'l3q3': 'Yes, there was a prize!'
+        };
+        let l3Answered = {};
+        let l3Correct = 0;
+        let l3Total = 3;
+
+        // Level 4: Story answers
+        const storyAnswers = {
+            'story1_select': 'was',
+            'story2_select': 'were',
+            'story3_select': 'weren\'t',
+            'story4_select': 'any',
+            'story5_select': 'were',
+            'story6_select': 'some',
+            'story7_select': 'were',
+            'story8_select': 'some',
+            'story9_select': 'was',
+            'story10_select': 'were'
+        };
+
+        function startGame() {
+            totalStars = 0;
+            correctAnswers = 0;
+            totalQuestions = 0;
+            currentLevel = 1;
+            updateProgress();
+            showScreen('level1Screen');
+            updateLevelBadge(1);
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function updateProgress() {
+            document.getElementById('starsDisplay').textContent = '⭐ ' + totalStars;
+            let progress = Math.min(100, (correctAnswers / 15) * 100);
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        function updateLevelBadge(level) {
+            document.getElementById('levelBadge').textContent = 'Уровень ' + level;
+        }
+
+        function showScorePopup(plus) {
+            let popup = document.createElement('div');
+            popup.className = 'score-popup';
+            popup.textContent = '+' + plus + ' ⭐';
+            document.body.appendChild(popup);
+            setTimeout(() => popup.remove(), 1000);
+        }
+
+        function addStars(count) {
+            totalStars += count;
+            correctAnswers += count;
+            updateProgress();
+            showScorePopup(count);
+        }
+
+        function showConfetti() {
+            const container = document.getElementById('confettiContainer');
+            const colors = ['#f44336', '#e91e63', '#9c27b0', '#3f51b5', '#2196f3', '#00bcd4', '#4caf50', '#ffeb3b', '#ff9800'];
+            for (let i = 0; i < 50; i++) {
+                let piece = document.createElement('div');
+                piece.className = 'confetti-piece';
+                piece.style.left = Math.random() * 100 + '%';
+                piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                piece.style.animationDelay = Math.random() * 2 + 's';
+                piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                piece.style.width = (Math.random() * 10 + 5) + 'px';
+                piece.style.height = (Math.random() * 10 + 5) + 'px';
+                container.appendChild(piece);
+            }
+            setTimeout(() => container.innerHTML = '', 4000);
+        }
+
+        function showLevelComplete(stars, text) {
+            let overlay = document.createElement('div');
+            overlay.className = 'level-complete-overlay';
+            overlay.innerHTML = `
+                <div class="level-complete-card">
+                    <h2>🎉 Уровень пройден!</h2>
+                    <div class="stars-earned">${'⭐'.repeat(stars)}</div>
+                    <p>${text}</p>
+                    <button class="btn-nav btn-next" onclick="this.closest('.level-complete-overlay').remove()">Продолжить ➡️</button>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+            showConfetti();
+        }
+
+        // ===== LEVEL 1: WORD MATCH =====
+        function selectSingular(el) {
+            if (el.classList.contains('matched')) return;
+            document.querySelectorAll('.match-singular').forEach(item => item.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedSingular = el.dataset.word;
+            tryMatch();
+        }
+
+        function selectPlural(el) {
+            if (el.classList.contains('matched')) return;
+            document.querySelectorAll('.match-plural').forEach(item => item.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedPlural = el.dataset.word;
+            tryMatch();
+        }
+
+        function tryMatch() {
+            if (!selectedSingular || !selectedPlural) return;
+
+            if (pairs[selectedSingular] === selectedPlural) {
+                let singEl = document.querySelector(`.match-singular[data-word="${selectedSingular}"]`);
+                let plurEl = document.querySelector(`.match-plural[data-word="${selectedPlural}"]`);
+                singEl.classList.remove('selected');
+                plurEl.classList.remove('selected');
+                singEl.classList.add('matched');
+                plurEl.classList.add('matched');
+                matchedPairs++;
+                addStars(1);
+                totalQuestions++;
+                updateProgress();
+
+                if (matchedPairs === 3) {
+                    let fb = document.getElementById('level1Feedback');
+                    fb.className = 'feedback success show';
+                    fb.innerHTML = '🎉 Отлично! Все пары найдены! <br>man→men, woman→women, child→children';
+                    document.getElementById('btnNext1').disabled = false;
+                    showLevelComplete(3, 'Ты запомнил все исключения! 🎊');
+                }
+            } else {
+                let singEl = document.querySelector(`.match-singular[data-word="${selectedSingular}"]`);
+                let plurEl = document.querySelector(`.match-plural[data-word="${selectedPlural}"]`);
+                singEl.classList.add('wrong');
+                plurEl.classList.add('wrong');
+                totalQuestions++;
+                updateProgress();
+                setTimeout(() => {
+                    singEl.classList.remove('wrong', 'selected');
+                    plurEl.classList.remove('wrong', 'selected');
+                }, 600);
+                let fb = document.getElementById('level1Feedback');
+                fb.className = 'feedback error show';
+                fb.innerHTML = '❌ Попробуй ещё! Подумай: man → ?';
+                setTimeout(() => fb.classList.remove('show'), 2000);
+            }
+
+            selectedSingular = null;
+            selectedPlural = null;
+        }
+
+        // ===== LEVEL 2: SOME OR ANY =====
+        function chooseSomeAny(qId, answer, btn) {
+            if (l2Answered[qId]) return;
+            l2Answered[qId] = true;
+
+            let card = document.getElementById(qId);
+            let blank = document.getElementById(qId + 'blank');
+            let btns = card.querySelectorAll('.option-btn');
+
+            btns.forEach(b => b.style.pointerEvents = 'none');
+            blank.textContent = answer;
+            blank.classList.add('filled');
+
+            if (answer === l2Answers[qId]) {
+                btn.classList.add('correct-btn');
+                card.classList.add('correct');
+                blank.classList.add('filled');
+                addStars(1);
+                l2Correct++;
+            } else {
+                btn.classList.add('wrong-btn');
+                card.classList.add('incorrect');
+                blank.classList.add('wrong-blank');
+                btns.forEach(b => {
+                    if (b.textContent.trim() === l2Answers[qId]) {
+                        b.classList.add('correct-btn');
+                    }
+                });
+            }
+
+            totalQuestions++;
+            updateProgress();
+
+            let answeredCount = Object.keys(l2Answered).length;
+            if (answeredCount === l2Total) {
+                let fb = document.getElementById('level2Feedback');
+                let starsEarned = l2Correct;
+                if (l2Correct === l2Total) {
+                    fb.className = 'feedback success show';
+                    fb.innerHTML = '🎉 Все правильно! Ты отлично знаешь some и any!';
+                    showLevelComplete(starsEarned, `Результат: ${l2Correct}/${l2Total} правильно! 🌟`);
+                } else {
+                    fb.className = 'feedback hint show';
+                    fb.innerHTML = `💡 Результат: ${l2Correct}/${l2Total}. Запомни: <b>some</b> = ✅ есть, <b>any</b> = ❌ нет или  вопрос`;
+                    showLevelComplete(starsEarned, `Результат: ${l2Correct}/${l2Total}. Попробуй ещё раз! 💪`);
+                }
+                document.getElementById('btnNext2').disabled = false;
+            }
+        }
+
+        // ===== LEVEL 3: PICTURE QUESTIONS =====
+        function answerPicture(qId, answer, btn) {
+            if (l3Answered[qId]) return;
+            l3Answered[qId] = true;
+
+            let card = document.getElementById(qId);
+            let btns = card.querySelectorAll('.answer-btn');
+
+            btns.forEach(b => b.style.pointerEvents = 'none');
+
+            if (answer === l3Answers[qId]) {
+                btn.classList.add('correct-answer');
+                card.classList.add('correct');
+                addStars(1);
+                l3Correct++;
+            } else {
+                btn.classList.add('wrong-answer');
+                card.classList.add('incorrect');
+                btns.forEach(b => {
+                    if (b.textContent.trim() === l3Answers[qId]) {
+                        b.classList.add('correct-answer');
+                    }
+                });
+            }
+
+            totalQuestions++;
+            updateProgress();
+
+            let answeredCount = Object.keys(l3Answered).length;
+            if (answeredCount === l3Total) {
+                let fb = document.getElementById('level3Feedback');
+                let starsEarned = l3Correct;
+                if (l3Correct === l3Total) {
+                    fb.className = 'feedback success show';
+                    fb.innerHTML = '🎉 Превосходно! Ты настоящий детектив!';
+                    showLevelComplete(starsEarned, `Результат: ${l3Correct}/${l3Total} правильно! `);
+                } else {
+                    fb.className = 'feedback hint show';
+                    fb.innerHTML = `💡 Результат: ${l3Correct}/${l3Total}. Посмотри внимательно на картинку!`;
+                    showLevelComplete(starsEarned, `Результат: ${l3Correct}/${l3Total}. Ты почти у цели! 🎯`);
+                }
+                document.getElementById('btnNext3').disabled = false;
+            }
+        }
+
+        // ===== LEVEL 4: STORY BUILDER =====
+        function checkStory() {
+            let allCorrect = true;
+            let allFilled = true;
+
+            for (let id in storyAnswers) {
+                let select = document.getElementById(id);
+                if (select.value === '') {
+                    allFilled = false;
+                } else if (select.value === storyAnswers[id]) {
+                    select.classList.remove('wrong-select');
+                    select.classList.add('correct-select');
+                } else {
+                    select.classList.remove('correct-select');
+                    select.classList.add('wrong-select');
+                    allCorrect = false;
+                }
+            }
+
+            if (allFilled && allCorrect) {
+                let fb = document.getElementById('level4Feedback');
+                fb.className = 'feedback success show';
+                fb.innerHTML = '✅ Отчёт восстановлен! Школьное награждение было отличным!';
+                addStars(4);
+                totalQuestions += 10;
+                updateProgress();
+                document.getElementById('btnNext4').disabled = false;
+                showLevelComplete(4, 'Ты восстановил весь отчёт! ✨');
+            } else if (allFilled && !allCorrect) {
+                let fb = document.getElementById('level4Feedback');
+                fb.className = 'feedback hint show';
+                fb.innerHTML = '💡 Есть ошибки! Красные слова — неправильные. Попробуй исправить!';
+            }
+        }
+
+        function resetStory() {
+            for (let id in storyAnswers) {
+                let select = document.getElementById(id);
+                select.value = '';
+                select.classList.remove('correct-select', 'wrong-select');
+            }
+            document.getElementById('level4Feedback').className = 'feedback';
+            document.getElementById('btnNext4').disabled = true;
+        }
+
+        // ===== NAVIGATION =====
+        function goToLevel(level) {
+            currentLevel = level;
+            updateLevelBadge(level);
+            if (level === 2) {
+                showScreen('level2Screen');
+            } else if (level === 3) {
+                showScreen('level3Screen');
+            } else if (level === 4) {
+                showScreen('level4Screen');
+            }
+        }
+
+        function showCertificate() {
+            showScreen('certificateScreen');
+            let starsDisplay = '';
+            if (totalStars >= 14) starsDisplay = '⭐⭐⭐⭐⭐';
+            else if (totalStars >= 11) starsDisplay = '⭐⭐⭐⭐';
+            else if (totalStars >= 8) starsDisplay = '⭐⭐⭐';
+            else if (totalStars >= 5) starsDisplay = '⭐⭐';
+            else starsDisplay = '⭐';
+
+            document.getElementById('certStars').textContent = starsDisplay;
+            document.getElementById('certCorrect').textContent = correctAnswers;
+            document.getElementById('certTotal').textContent = totalQuestions;
+            document.getElementById('certStarsNum').textContent = totalStars;
+
+            let nameInput = document.getElementById('playerName');
+            nameInput.addEventListener('input', function() {
+                document.getElementById('certName').textContent = this.value || 'Time Detective';
+            });
+
+            showConfetti();
+        }
+
+        function restartGame() {
+            // Reset all state
+            totalStars = 0;
+            correctAnswers = 0;
+            totalQuestions = 0;
+            currentLevel = 1;
+            selectedSingular = null;
+            selectedPlural = null;
+            matchedPairs = 0;
+            l2Answered = {};
+            l2Correct = 0;
+            l3Answered = {};
+            l3Correct = 0;
+
+            // Reset Level 1
+            document.querySelectorAll('.match-item').forEach(item => {
+                item.classList.remove('selected', 'matched', 'wrong');
+            });
+            document.getElementById('level1Feedback').className = 'feedback';
+            document.getElementById('btnNext1').disabled = true;
+
+            // Reset Level 2
+            document.querySelectorAll('#level2Screen .sentence-card').forEach(card => {
+                card.classList.remove('correct', 'incorrect');
+            });
+            document.querySelectorAll('#level2Screen .sentence-blank').forEach(blank => {
+                blank.textContent = '______';
+                blank.classList.remove('filled', 'wrong-blank');
+            });
+            document.querySelectorAll('#level2Screen .option-btn').forEach(btn => {
+                btn.classList.remove('chosen', 'correct-btn', 'wrong-btn');
+                btn.style.pointerEvents = '';
+            });
+            document.getElementById('level2Feedback').className = 'feedback';
+            document.getElementById('btnNext2').disabled = true;
+
+            // Reset Level 3
+            document.querySelectorAll('#level3Screen .sentence-card').forEach(card => {
+                card.classList.remove('correct', 'incorrect');
+            });
+            document.querySelectorAll('#level3Screen .answer-btn').forEach(btn => {
+                btn.classList.remove('correct-answer', 'wrong-answer');
+                btn.style.pointerEvents = '';
+            });
+            document.getElementById('level3Feedback').className = 'feedback';
+            document.getElementById('btnNext3').disabled = true;
+
+            // Reset Level 4
+            resetStory();
+
+            // Reset name
+            document.getElementById('playerName').value = '';
+            document.getElementById('certName').textContent = 'Time Detective';
+
+            updateProgress();
+            updateLevelBadge(1);
+            showScreen('welcomeScreen');
+        }
+
+        // Keyboard support for name input
+        document.getElementById('playerName').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('certName').textContent = this.value || 'Time Detective';
+            }
+        });
+    </script>
+</body>
+</html>
